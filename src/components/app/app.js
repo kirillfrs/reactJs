@@ -29,21 +29,25 @@ export default class App extends Component {
                 {
                     label: 'Going to learn React',
                     important: true,
-                    id: 'id-1'
+                    like: false,
+                    id: nextId()
                 }, {
                     label: 'That is so good',
                     important: false,
-                    id: 'id-2'
+                    like: false,
+                    id: nextId()
                 }, {
                     label: 'I need a break...',
                     important: false,
-                    id: 'id-3'
+                    like: false,
+                    id: nextId()
                 }
-            ]
+            ],
+            term: '',
+            filter: 'all'
         }
-        // this.maxiD = 4;
     }
-    
+
 
     deleteItem = (id) => {
         this.setState(({ data }) => {
@@ -60,12 +64,12 @@ export default class App extends Component {
         })
     }
     addItem = (body) => {
-        const setid = nextId(); // 
         const newItem = {
             label: body,
-            improtant: false,
-            id: setid
+            important: false,
+            id: nextId()
         }
+
         this.setState(({ data }) => {
             const newArray = [...data, newItem];
             return {
@@ -73,20 +77,82 @@ export default class App extends Component {
             }
         })
     }
+    changeFilter = (id, field) => {
+        this.setState(({ data }) => {
+            const index = data.findIndex((elem) => elem.id === id);
+            const old = data[index];
+            const newItem = { ...old, [field]: !old[field] };
+
+            const newArr = [...data.slice(0, index), newItem, ...data.slice(index + 1)];
+
+            return {
+                data: newArr
+            }
+        })
+    }
+    onToogleImportant = (id) => {
+        this.changeFilter(id, 'important');
+    }
+
+    onToogleLiked = (id) => {
+        this.changeFilter(id, 'like')
+
+    }
+    searchPost = (items, term) => {
+        if (term.length === items) {
+            return items
+        }
+
+        return items.filter((item) => {
+            return item.label.indexOf(term) > -1;
+        })
+    }
+
+    filterPost = (items, filter) => {
+        if (filter === 'like') {
+            return items.filter(elem => elem.like)
+        } else {
+            return items
+        }
+
+    }
+
+    onUpdateSearch = (term) => {
+        this.setState({ term });
+    }
+
+    onFilterSelect = (filter) => {
+        this.setState({ filter });
+
+    }
 
     render() {
+        const { data, term, filter } = this.state;
+        const liked = data.filter(item => item.like).length;
+        const allPosts = data.length;
+
+        const visiblePosts = this.filterPost(this.searchPost(data, term), filter);
 
         return (
 
             <AppBlock>
-                <AppHeader />
+                <AppHeader
+                    liked={liked}
+                    allPosts={allPosts}
+                />
                 <div className="search-panel d-flex">
-                    <SearchPanel />
-                    <PostStatusFilter />
+                    <SearchPanel
+                        onUpdateSearch={this.onUpdateSearch} />
+                    <PostStatusFilter
+                        filter={filter}
+                        onFilterSelect={this.onFilterSelect}
+                    />
                 </div>
                 <PostList
-                    posts={this.state.data}
+                    posts={visiblePosts}
                     onDelete={this.deleteItem}
+                    onToogleImportant={this.onToogleImportant}
+                    onToogleLiked={this.onToogleLiked}
                 />
                 <PostAddForm
                     onAdd={this.addItem}
