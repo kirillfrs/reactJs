@@ -5,7 +5,7 @@ import { ListGroup } from 'reactstrap';
 import './post-list.css';
 
 
-const PostList = ({ posts }) => {
+const PostList = ({ posts,onDelete }) => {
     const dataFilter = posts.filter(item => item.label);
     const elements = dataFilter.map((item) => {
 
@@ -17,7 +17,9 @@ const PostList = ({ posts }) => {
                     label={item.label}
                     important={item.important} /> */}
                 {/* сложный (разворачивает массив и т.к данные ключ значения совпадает все будет работать) спред оператор развернет объект */}
-                <PostListItem {...ItemProps} />
+                <PostListItem
+                    {...ItemProps}
+                    onDelete={() => onDelete(id)} />
             </li>
         )
     });
